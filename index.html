@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 数字人对话</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;display:flex;align-items:center;justify-content:center;color:#fff}
+.ct{text-align:center;max-width:680px;width:90%}
+.logo{font-size:64px;margin-bottom:16px}
+h1{font-size:28px;margin-bottom:8px;font-weight:600}
+.sub{color:rgba(255,255,255,.6);font-size:15px;margin-bottom:40px}
+.grid{display:flex;gap:16px;justify-content:center;margin-bottom:32px;flex-wrap:wrap}
+.card{background:rgba(255,255,255,.08);border-radius:16px;padding:24px 28px;min-width:150px;border:2px solid rgba(255,255,255,.1);cursor:pointer;transition:all .3s;text-decoration:none;color:#fff;display:block}
+.card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.12)}
+.card.off{cursor:not-allowed;opacity:.5}
+.card.off:hover{transform:none;border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.08)}
+.card .nm{font-size:15px;color:rgba(255,255,255,.7);margin-bottom:8px}
+.card .num{font-size:32px;font-weight:700}
+.ok .num{color:#4ade80}.busy .num{color:#f87171}.off .num{color:#9ca3af}
+.card .st{font-size:13px;color:rgba(255,255,255,.5);margin-top:6px}
+.card .go{font-size:12px;color:rgba(255,255,255,.4);margin-top:8px}
+.card:not(.off) .go{color:#a78bfa}
+.auto{margin-top:8px}
+.btn{display:inline-block;padding:14px 40px;font-size:16px;font-weight:600;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:50px;cursor:pointer;text-decoration:none;transition:all .3s;box-shadow:0 8px 30px rgba(102,126,234,.4)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(102,126,234,.5)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.msg{color:rgba(255,255,255,.6);font-size:14px;margin-top:16px}
+.sp{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="ct">
+<div class="logo">&#129302;</div>
+<h1>AI 数字人对话</h1>
+<p class="sub">点击任意服务器进入，或使用自动分配</p>
+<div class="grid" id="grid"><div class="card off"><div class="nm">加载中...</div><div class="num">--</div></div></div>
+<div class="auto" id="auto"></div>
+</div>
+<script>
+var MACHINES=[
+ {id:"1",name:"1号机",spec:"4080S 32GB",url:"https://uu1120778-8131-90c71562.westb.seetacloud.com:8443",max:2},
+ {id:"2",name:"2号机",spec:"4080S 32GB",url:"https://uu1120778-3zb9-a4fb444b.weste.seetacloud.com:8443",max:2},
+ {id:"3",name:"3号机",spec:"4080S 32GB",url:"https://uu1120778-3zb9-f5aecdde.weste.seetacloud.com:8443",max:2},
+ {id:"4",name:"4号机",spec:"2080Ti 11GB",url:"https://uu1120778-region42-placeholder.seetacloud.com:8443",max:1}
+];
+function ls(){
+ Promise.all(MACHINES.map(function(m){
+  return fetch(m.url+"/api/online",{mode:"cors"}).then(function(r){return r.json()}).then(function(d){
+   var on=(d.sessions||[]).length;
+   return {id:m.id,name:m.name,spec:m.spec,url:m.url,max:m.max,online:on,available:on<m.max,error:null};
+  }).catch(function(e){
+   return {id:m.id,name:m.name,spec:m.spec,url:m.url,max:m.max,online:0,available:false,error:String(e)};
+  });
+ })).then(rs);
+}
+function rs(ms){
+ var g=document.getElementById("grid"),a=document.getElementById("auto");
+ var h="";
+ for(var i=0;i<ms.length;i++){
+  var m=ms[i],c="off",l="离线",go="";
+  if(m.error){c="off";l="离线"}
+  else if(m.available){c="ok";l=m.online+"/"+m.max+" 在线";go="点击进入 →"}
+  else{c="busy";l="已满 "+m.online+"/"+m.max;go="点击进入 →"}
+  var num=m.error?"&#10005;":m.online+"/"+m.max;
+  if(m.error){
+   h+='<div class="card off"><div class="nm">'+m.name+' · '+m.spec+'</div><div class="num">'+num+'</div><div class="st">'+l+'</div></div>';
+  }else{
+   h+='<a class="card '+c+'" href="'+m.url+'"><div class="nm">'+m.name+' · '+m.spec+'</div><div class="num">'+num+'</div><div class="st">'+l+'</div><div class="go">'+go+'</div></a>';
+  }
+ }
+ g.innerHTML=h;
+ var av=[];
+ for(var j=0;j<ms.length;j++){if(ms[j].available)av.push(ms[j])}
+ av.sort(function(x,y){return x.online-y.online});
+ if(av.length){
+  a.innerHTML='<a class="btn" href="'+av[0].url+'">⚡ 自动分配（推荐 '+av[0].name+'）</a><p class="msg">'+av[0].name+' 当前 '+av[0].online+'/'+av[0].max+' 人在线</p>';
+ }else{
+  var ao=true;
+  for(var k=0;k<ms.length;k++){if(!ms[k].error)ao=false}
+  a.innerHTML=ao?'<p class="msg">所有服务器暂时离线，请稍后再试</p>':'<button class="btn" disabled>服务器繁忙</button><p class="msg">当前所有线路已满，请稍后再试</p>';
+ }
+}
+ls();setInterval(ls,10000);
+</script>
+</body>
+</html>
