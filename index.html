@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 数字人对话</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;display:flex;align-items:center;justify-content:center;color:#fff}
+.ct{text-align:center;max-width:560px;width:90%}
+.logo{font-size:64px;margin-bottom:16px}
+h1{font-size:28px;margin-bottom:8px;font-weight:600}
+.sub{color:rgba(255,255,255,.6);font-size:15px;margin-bottom:40px}
+.grid{display:flex;gap:12px;justify-content:center;margin-bottom:32px;flex-wrap:wrap}
+.card{background:rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;min-width:130px;border:1px solid rgba(255,255,255,.1)}
+.card .nm{font-size:14px;color:rgba(255,255,255,.7);margin-bottom:6px}
+.card .num{font-size:28px;font-weight:700}
+.ok .num{color:#4ade80}.busy .num{color:#f87171}.off .num{color:#9ca3af}
+.btn{display:inline-block;padding:16px 48px;font-size:18px;font-weight:600;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:50px;cursor:pointer;text-decoration:none;transition:all .3s;box-shadow:0 8px 30px rgba(102,126,234,.4)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(102,126,234,.5)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.msg{color:rgba(255,255,255,.6);font-size:15px;margin-top:20px}
+.tip{color:rgba(255,255,255,.4);font-size:13px;margin-top:24px}
+.sp{display:inline-block;width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="ct">
+<div class="logo">&#129302;</div>
+<h1>AI 数字人对话</h1>
+<p class="sub">智能分配空闲服务器，即刻开始对话</p>
+<div class="grid" id="grid"><div class="card off"><div class="nm">加载中...</div><div class="num">--</div></div></div>
+<div id="act"><span class="sp"></span>正在查询服务器状态...</div>
+<p class="tip" id="tip" style="display:none">页面将在 <span id="cd">3</span> 秒后自动进入</p>
+</div>
+<script>
+var MACHINES=[
+ {id:"1",name:"1号机 (4080S)",url:"https://uu1120778-8131-90c71562.westb.seetacloud.com:8443",max:2},
+ {id:"2",name:"2号机 (4080S)",url:"https://uu1120778-3zb9-a4fb444b.weste.seetacloud.com:8443",max:2},
+ {id:"3",name:"3号机 (4080S)",url:"https://uu1120778-3zb9-f5aecdde.weste.seetacloud.com:8443",max:2},
+ {id:"4",name:"4号机 (2080Ti)",url:"https://uu1120778-region42-placeholder.seetacloud.com:8443",max:1}
+];
+var au=null;
+function ls(){
+ Promise.all(MACHINES.map(function(m){
+  return fetch(m.url+"/api/online",{mode:"cors"}).then(function(r){return r.json()}).then(function(d){
+   var on=(d.sessions||[]).length;
+   return {id:m.id,name:m.name,url:m.url,max:m.max,online:on,available:on<m.max,error:null};
+  }).catch(function(e){
+   return {id:m.id,name:m.name,url:m.url,max:m.max,online:0,available:false,error:String(e)};
+  });
+ })).then(rs);
+}
+function rs(ms){
+ var g=document.getElementById("grid"),a=document.getElementById("act"),t=document.getElementById("tip");
+ var h="";
+ for(var i=0;i<ms.length;i++){
+  var m=ms[i],c="off",l="离线";
+  if(m.error){c="off";l="离线"}
+  else if(m.available){c="ok";l=m.online+"/"+m.max+" 在线"}
+  else{c="busy";l="已满 "+m.online+"/"+m.max}
+  var num=m.error?"&#10005;":m.online+"/"+m.max;
+  h+='<div class="card '+c+'"><div class="nm">'+m.name+'</div><div class="num">'+num+'</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:4px">'+l+'</div></div>';
+ }
+ g.innerHTML=h;
+ var av=[];
+ for(var j=0;j<ms.length;j++){if(ms[j].available)av.push(ms[j])}
+ av.sort(function(x,y){return x.online-y.online});
+ if(av.length){
+  var m=av[0];au=m.url;
+  a.innerHTML='<a class="btn" href="'+m.url+'">立即进入对话 &#8594;</a><p class="msg">已为您分配到 <b>'+m.name+'</b>（'+m.online+'/'+m.max+' 人在线）</p>';
+  t.style.display="block";sc();
+ }else{
+  var ao=true;
+  for(var k=0;k<ms.length;k++){if(!ms[k].error)ao=false}
+  a.innerHTML=ao?'<p class="msg">所有服务器暂时离线，请稍后再试</p>':'<button class="btn" disabled>服务器繁忙</button><p class="msg">当前所有线路已满，请稍后再试</p>';
+  t.style.display="none";
+ }
+}
+function sc(){
+ var el=document.getElementById("cd");var cd=3;el.textContent=cd;
+ if(window._iv)clearInterval(window._iv);
+ window._iv=setInterval(function(){cd--;el.textContent=cd;if(cd<=0){clearInterval(window._iv);if(au)location.href=au;}},1000);
+}
+ls();setInterval(ls,10000);
+</script>
+</body>
+</html>
