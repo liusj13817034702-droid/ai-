@@ -14,7 +14,7 @@
     ]
   },
   "support": {
-    "enabled": true,
+    "enabled": false,
     "title": "",
     "body": "",
     "buttonText": "",
