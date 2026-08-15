@@ -1,15 +1,13 @@
 {
   "notice": {
     "enabled": true,
-    "title": "温馨提示",
+    "title": "",
     "body": ""
   },
   "bulletin": {
     "enabled": true,
     "title": "",
-    "items": [
-      "由于站长资金有限，服务器不能长时间开着，想要长时间运营还得靠打赏活下去🤪"
-    ]
+    "items": []
   },
   "support": {
     "enabled": true,
