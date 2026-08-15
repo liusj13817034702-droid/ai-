@@ -7,10 +7,14 @@
   "bulletin": {
     "enabled": true,
     "title": "",
-    "items": []
+    "items": [
+      "站长钱包有点瘦，服务器开着大概 2 元/小时，这个站已经快把我吸干啦😭",
+      "如果你来的时候没开机，可以戳一戳下面的按钮提醒站长，我看到会尽快开机～",
+      "如果顺手打赏一下，开机速度可能会偷偷加成一点点哦⚡😆"
+    ]
   },
   "support": {
-    "enabled": false,
+    "enabled": true,
     "title": "",
     "body": "",
     "buttonText": "",
