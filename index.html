@@ -44,19 +44,21 @@ const MACHINES=[
   {id:"3",name:"3号机 · 4080S 32GB",url:"https://uu1120778-f5aecdde.weste.seetacloud.com:8443",max:2},
   {id:"4",name:"4号机 · 2080Ti 11GB",url:"https://stating-ozone-scored-mild.trycloudflare.com",max:1}
 ];
-let autoUrl=null;
+let autoUrl=null, panelsConfig=null;
 async function loadPanels(){
   try{
     const res=await fetch('./site-panels.json',{cache:'no-store'});
     if(!res.ok)return;
     const cfg=await res.json();
+    panelsConfig=cfg;
     const el=document.getElementById('panels');
     let html='';
     if(cfg.notice&&cfg.notice.enabled)html+=`<section class="band"><h2>${cfg.notice.title||'温馨提示'}</h2><p>${cfg.notice.body||''}</p></section>`;
     if(cfg.bulletin&&cfg.bulletin.enabled)html+=`<section class="band"><h2>${cfg.bulletin.title||'公告'}</h2><ul>${(cfg.bulletin.items||[]).map(x=>`<li>${x}</li>`).join('')}</ul></section>`;
     if(cfg.support&&cfg.support.enabled){
       const btn=(cfg.support.buttonText?`<a class="band-btn" href="${cfg.support.buttonAction||'#'}" target="_blank" rel="noopener noreferrer">${cfg.support.buttonText}</a>`:'');
-      html+=`<section class="band"><h2>${cfg.support.title||'为爱发电'}</h2><p>${cfg.support.body||''}</p>${btn}</section>`;
+      const pingBtns=(cfg.ping?`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="band-btn" type="button" onclick="pingOwner(false)">${cfg.ping.normalText||'戳一戳站长'}</button><button class="band-btn" type="button" onclick="pingOwner(true)">${cfg.ping.vipText||'打赏后提醒站长'}</button></div>`:'');
+      html+=`<section class="band"><h2>${cfg.support.title||'为爱发电'}</h2><p>${cfg.support.body||''}</p>${btn}${pingBtns}<div id="ping-status" style="font-size:12px;color:rgba(255,255,255,.6)"></div></section>`;
     }
     el.innerHTML=html;
   }catch(_){ }
@@ -105,6 +107,19 @@ function renderServers(ms){
     const allOffline=ms.every(m=>m.error);
     a.innerHTML=allOffline?'<p class="msg">所有服务器暂时离线，请稍后再试</p>':'<button class="btn" disabled>服务器繁忙</button><p class="msg">当前所有线路已满，请稍后再试</p>';
     t.style.display='none';
+  }
+}
+async function pingOwner(vip){
+  const el=document.getElementById('ping-status');
+  if(!panelsConfig||!panelsConfig.ping||!panelsConfig.ping.apiBase){ if(el) el.textContent='未配置提醒接口'; return; }
+  try{
+    if(el) el.textContent='正在提醒站长...';
+    const resp=await fetch(panelsConfig.ping.apiBase.replace(/\/$/,'')+'/api/ping-owner',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vip:!!vip,source:'GitHub Pages 首页'})});
+    const data=await resp.json();
+    if(!data.ok) throw new Error(data.error||'提醒失败');
+    if(el) el.textContent=vip?'已提醒站长（打赏优先）⚡':'已提醒站长，稍等开机～';
+  }catch(e){
+    if(el) el.textContent='提醒失败：'+e.message;
   }
 }
 loadPanels();
