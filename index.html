@@ -16,6 +16,10 @@ h1{font-size:28px;margin-bottom:8px;font-weight:600}
 .band h2{font-size:14px;line-height:1.3}.band p,.band li{font-size:13px;line-height:1.6;color:rgba(255,255,255,.72)}.band ul{padding-left:18px}.band-btn{justify-self:start;padding:8px 14px;border-radius:6px;background:#667eea;color:#fff;text-decoration:none;font-size:13px;font-weight:700}
 .grid{display:flex;gap:12px;justify-content:center;margin-bottom:28px;flex-wrap:wrap}
 .card{background:rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;min-width:160px;border:1px solid rgba(255,255,255,.1)}
+.card-link{color:inherit;text-decoration:none;display:block;transition:transform .2s,border-color .2s,box-shadow .2s}
+.card-link.ok:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(102,126,234,.22);border-radius:12px}
+.card-link.ok .card{border-color:rgba(120,140,255,.32)}
+.card-link.ok:hover .card{border-color:rgba(120,140,255,.7)}
 .card .nm{font-size:14px;color:rgba(255,255,255,.78);margin-bottom:6px}.card .num{font-size:28px;font-weight:700}.ok .num{color:#4ade80}.busy .num{color:#f87171}.off .num{color:#9ca3af}
 .btn{display:inline-block;padding:16px 48px;font-size:18px;font-weight:600;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:50px;cursor:pointer;text-decoration:none;transition:all .3s;box-shadow:0 8px 30px rgba(102,126,234,.4)}
 .btn:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(102,126,234,.5)}.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
@@ -88,7 +92,8 @@ function renderServers(ms){
     else{c='busy';l=`已满 ${m.online}/${m.max}`;}
     const num=m.error?'✕':`${m.online}/${m.max}`;
     const enter=!m.error&&m.available?`<div style="font-size:12px;color:#aab4ff;margin-top:8px">点击进入 →</div>`:`<div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:8px">${l}</div>`;
-    h+=`<div class="card ${c}"><div class="nm">${m.name}</div><div class="num">${num}</div>${enter}</div>`;
+    const inner=`<div class="card ${c}"><div class="nm">${m.name}</div><div class="num">${num}</div>${enter}</div>`;
+    h+=(!m.error&&m.available)?`<a class="card-link ${c}" href="${m.url}">${inner}</a>`:inner;
   }
   g.innerHTML=h;
   const av=ms.filter(m=>m.available).sort((x,y)=>x.online-y.online);
