@@ -2,22 +2,20 @@
   "notice": {
     "enabled": true,
     "title": "温馨提示",
-    "body": "高峰时段可能需要排队，建议优先选择在线人数较少的服务器，或者稍后重试。"
+    "body": ""
   },
   "bulletin": {
     "enabled": true,
-    "title": "公告",
+    "title": "",
     "items": [
-      "新增文字输入与语音双入口。",
-      "高峰时段可能出现排队，请耐心等待。",
-      "角色与声音会持续优化中。"
+      "由于站长资金有限，服务器不能长时间开着，想要长时间运营还得靠打赏活下去🤪"
     ]
   },
   "support": {
     "enabled": true,
-    "title": "为爱发电",
-    "body": "如果数字人对你有帮助，可以支持项目继续维护、扩容和优化体验。",
-    "buttonText": "了解支持方式",
-    "buttonAction": "https://liusj13817034702-droid.github.io/ai-/"
+    "title": "",
+    "body": "",
+    "buttonText": "",
+    "buttonAction": ""
   }
 }
