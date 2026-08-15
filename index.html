@@ -7,27 +7,19 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;display:flex;align-items:center;justify-content:center;color:#fff}
-.ct{text-align:center;max-width:680px;width:90%}
+.ct{text-align:center;max-width:760px;width:92%;padding:28px 0}
 .logo{font-size:64px;margin-bottom:16px}
 h1{font-size:28px;margin-bottom:8px;font-weight:600}
-.sub{color:rgba(255,255,255,.6);font-size:15px;margin-bottom:40px}
-.grid{display:flex;gap:16px;justify-content:center;margin-bottom:32px;flex-wrap:wrap}
-.card{background:rgba(255,255,255,.08);border-radius:16px;padding:24px 28px;min-width:150px;border:2px solid rgba(255,255,255,.1);cursor:pointer;transition:all .3s;text-decoration:none;color:#fff;display:block}
-.card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.12)}
-.card.off{cursor:not-allowed;opacity:.5}
-.card.off:hover{transform:none;border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.08)}
-.card .nm{font-size:15px;color:rgba(255,255,255,.7);margin-bottom:8px}
-.card .num{font-size:32px;font-weight:700}
-.ok .num{color:#4ade80}.busy .num{color:#f87171}.off .num{color:#9ca3af}
-.card .st{font-size:13px;color:rgba(255,255,255,.5);margin-top:6px}
-.card .go{font-size:12px;color:rgba(255,255,255,.4);margin-top:8px}
-.card:not(.off) .go{color:#a78bfa}
-.auto{margin-top:8px}
-.btn{display:inline-block;padding:14px 40px;font-size:16px;font-weight:600;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:50px;cursor:pointer;text-decoration:none;transition:all .3s;box-shadow:0 8px 30px rgba(102,126,234,.4)}
-.btn:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(102,126,234,.5)}
-.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.msg{color:rgba(255,255,255,.6);font-size:14px;margin-top:16px}
-.sp{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;vertical-align:middle;margin-right:6px}
+.sub{color:rgba(255,255,255,.62);font-size:15px;margin-bottom:22px}
+.panels{display:grid;gap:10px;margin:0 auto 28px;max-width:720px}
+.band{display:grid;gap:8px;padding:12px 14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;text-align:left}
+.band h2{font-size:14px;line-height:1.3}.band p,.band li{font-size:13px;line-height:1.6;color:rgba(255,255,255,.72)}.band ul{padding-left:18px}.band-btn{justify-self:start;padding:8px 14px;border-radius:6px;background:#667eea;color:#fff;text-decoration:none;font-size:13px;font-weight:700}
+.grid{display:flex;gap:12px;justify-content:center;margin-bottom:28px;flex-wrap:wrap}
+.card{background:rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;min-width:160px;border:1px solid rgba(255,255,255,.1)}
+.card .nm{font-size:14px;color:rgba(255,255,255,.78);margin-bottom:6px}.card .num{font-size:28px;font-weight:700}.ok .num{color:#4ade80}.busy .num{color:#f87171}.off .num{color:#9ca3af}
+.btn{display:inline-block;padding:16px 48px;font-size:18px;font-weight:600;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:50px;cursor:pointer;text-decoration:none;transition:all .3s;box-shadow:0 8px 30px rgba(102,126,234,.4)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(102,126,234,.5)}.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.msg{color:rgba(255,255,255,.62);font-size:15px;margin-top:18px}.tip{color:rgba(255,255,255,.42);font-size:13px;margin-top:22px}.sp{display:inline-block;width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;vertical-align:middle;margin-right:8px}
 @keyframes sp{to{transform:rotate(360deg)}}
 </style>
 </head>
@@ -35,55 +27,89 @@ h1{font-size:28px;margin-bottom:8px;font-weight:600}
 <div class="ct">
 <div class="logo">&#129302;</div>
 <h1>AI 数字人对话</h1>
-<p class="sub">点击任意服务器进入，或使用自动分配</p>
+<p class="sub">智能分配空闲服务器，即刻开始对话</p>
+<div class="panels" id="panels"></div>
 <div class="grid" id="grid"><div class="card off"><div class="nm">加载中...</div><div class="num">--</div></div></div>
-<div class="auto" id="auto"></div>
+<div id="act"><span class="sp"></span>正在查询服务器状态...</div>
+<p class="tip" id="tip" style="display:none">页面将在 <span id="cd">3</span> 秒后自动进入</p>
 </div>
 <script>
-var MACHINES=[
- {id:"1",name:"1号机",spec:"4080S 32GB",url:"https://uu1120778-8131-90c71562.westb.seetacloud.com:8443",max:2},
- {id:"2",name:"2号机",spec:"4080S 32GB",url:"https://uu1120778-3zb9-a4fb444b.weste.seetacloud.com:8443",max:2},
- {id:"3",name:"3号机",spec:"4080S 32GB",url:"https://uu1120778-3zb9-f5aecdde.weste.seetacloud.com:8443",max:2},
- {id:"4",name:"4号机",spec:"2080Ti 11GB",url:"https://uu1120778-region42-placeholder.seetacloud.com:8443",max:1}
+const MACHINES=[
+  {id:"1",name:"1号机 · 4080S 32GB",url:"https://uu1120778-8131-90c71562.westb.seetacloud.com:8443",max:2},
+  {id:"2",name:"2号机 · 4080S 32GB",url:"https://uu1120778-a4fb444b.weste.seetacloud.com:8443",max:2},
+  {id:"3",name:"3号机 · 4080S 32GB",url:"https://uu1120778-f5aecdde.weste.seetacloud.com:8443",max:2},
+  {id:"4",name:"4号机 · 2080Ti 11GB",url:"https://stating-ozone-scored-mild.trycloudflare.com",max:1}
 ];
-function ls(){
- Promise.all(MACHINES.map(function(m){
-  return fetch(m.url+"/api/online",{mode:"cors"}).then(function(r){return r.json()}).then(function(d){
-   var on=(d.sessions||[]).length;
-   return {id:m.id,name:m.name,spec:m.spec,url:m.url,max:m.max,online:on,available:on<m.max,error:null};
-  }).catch(function(e){
-   return {id:m.id,name:m.name,spec:m.spec,url:m.url,max:m.max,online:0,available:false,error:String(e)};
-  });
- })).then(rs);
+let autoUrl=null, cd=3;
+async function loadPanels(){
+  try{
+    const res=await fetch('./site-panels.json',{cache:'no-store'});
+    if(!res.ok)return;
+    const cfg=await res.json();
+    const el=document.getElementById('panels');
+    let html='';
+    if(cfg.notice&&cfg.notice.enabled)html+=`<section class="band"><h2>${cfg.notice.title||'温馨提示'}</h2><p>${cfg.notice.body||''}</p></section>`;
+    if(cfg.bulletin&&cfg.bulletin.enabled)html+=`<section class="band"><h2>${cfg.bulletin.title||'公告'}</h2><ul>${(cfg.bulletin.items||[]).map(x=>`<li>${x}</li>`).join('')}</ul></section>`;
+    if(cfg.support&&cfg.support.enabled){
+      const btn=(cfg.support.buttonText?`<a class="band-btn" href="${cfg.support.buttonAction||'#'}" target="_blank" rel="noopener noreferrer">${cfg.support.buttonText}</a>`:'');
+      html+=`<section class="band"><h2>${cfg.support.title||'为爱发电'}</h2><p>${cfg.support.body||''}</p>${btn}</section>`;
+    }
+    el.innerHTML=html;
+  }catch(_){ }
 }
-function rs(ms){
- var g=document.getElementById("grid"),a=document.getElementById("auto");
- var h="";
- for(var i=0;i<ms.length;i++){
-  var m=ms[i],c="off",l="离线",go="";
-  if(m.error){c="off";l="离线"}
-  else if(m.available){c="ok";l=m.online+"/"+m.max+" 在线";go="点击进入 →"}
-  else{c="busy";l="已满 "+m.online+"/"+m.max;go="点击进入 →"}
-  var num=m.error?"&#10005;":m.online+"/"+m.max;
-  if(m.error){
-   h+='<div class="card off"><div class="nm">'+m.name+' · '+m.spec+'</div><div class="num">'+num+'</div><div class="st">'+l+'</div></div>';
-  }else{
-   h+='<a class="card '+c+'" href="'+m.url+'"><div class="nm">'+m.name+' · '+m.spec+'</div><div class="num">'+num+'</div><div class="st">'+l+'</div><div class="go">'+go+'</div></a>';
+async function fetchOnline(machine){
+  try{
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),5000);
+    const resp=await fetch(machine.url+'/api/online',{signal:controller.signal,headers:{'User-Agent':'dispatcher/1.0'}});
+    clearTimeout(timeout);
+    const data=await resp.json();
+    const online=(data.sessions||[]).length;
+    return {...machine,online,available:online<machine.max,error:null};
+  }catch(e){
+    return {...machine,online:0,available:false,error:e.message||'offline'};
   }
- }
- g.innerHTML=h;
- var av=[];
- for(var j=0;j<ms.length;j++){if(ms[j].available)av.push(ms[j])}
- av.sort(function(x,y){return x.online-y.online});
- if(av.length){
-  a.innerHTML='<a class="btn" href="'+av[0].url+'">⚡ 自动分配（推荐 '+av[0].name+'）</a><p class="msg">'+av[0].name+' 当前 '+av[0].online+'/'+av[0].max+' 人在线</p>';
- }else{
-  var ao=true;
-  for(var k=0;k<ms.length;k++){if(!ms[k].error)ao=false}
-  a.innerHTML=ao?'<p class="msg">所有服务器暂时离线，请稍后再试</p>':'<button class="btn" disabled>服务器繁忙</button><p class="msg">当前所有线路已满，请稍后再试</p>';
- }
 }
-ls();setInterval(ls,10000);
+async function refreshServers(){
+  try{
+    const results=await Promise.all(MACHINES.map(fetchOnline));
+    renderServers(results);
+  }catch(_){
+    document.getElementById('act').innerHTML='<p class="msg">无法连接调度服务，请刷新</p>';
+  }
+}
+function renderServers(ms){
+  const g=document.getElementById('grid'),a=document.getElementById('act'),t=document.getElementById('tip');
+  let h='';
+  for(let i=0;i<ms.length;i++){
+    const m=ms[i]; let c='off',l='离线';
+    if(m.error){c='off';l='离线';}
+    else if(m.available){c='ok';l=`${m.online}/${m.max} 在线`;}
+    else{c='busy';l=`已满 ${m.online}/${m.max}`;}
+    const num=m.error?'✕':`${m.online}/${m.max}`;
+    const enter=!m.error&&m.available?`<div style="font-size:12px;color:#aab4ff;margin-top:8px">点击进入 →</div>`:`<div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:8px">${l}</div>`;
+    h+=`<div class="card ${c}"><div class="nm">${m.name}</div><div class="num">${num}</div>${enter}</div>`;
+  }
+  g.innerHTML=h;
+  const av=ms.filter(m=>m.available).sort((x,y)=>x.online-y.online);
+  if(av.length){
+    const m=av[0]; autoUrl=m.url;
+    a.innerHTML=`<a class="btn" href="${m.url}">立即进入对话 &#8594;</a><p class="msg">已为您分配到 <b>${m.name}</b>（${m.online}/${m.max} 人在线）</p>`;
+    t.style.display='block'; startCountdown();
+  }else{
+    const allOffline=ms.every(m=>m.error);
+    a.innerHTML=allOffline?'<p class="msg">所有服务器暂时离线，请稍后再试</p>':'<button class="btn" disabled>服务器繁忙</button><p class="msg">当前所有线路已满，请稍后再试</p>';
+    t.style.display='none';
+  }
+}
+function startCountdown(){
+  const el=document.getElementById('cd');
+  let n=cd;
+  const iv=setInterval(()=>{n--; if(el)el.textContent=n; if(n<=0){clearInterval(iv); if(autoUrl)location.href=autoUrl;}},1000);
+}
+loadPanels();
+refreshServers();
+setInterval(refreshServers,10000);
 </script>
 </body>
 </html>
