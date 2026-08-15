@@ -31,7 +31,7 @@ h1{font-size:28px;margin-bottom:8px;font-weight:600}
 <div class="panels" id="panels"></div>
 <div class="grid" id="grid"><div class="card off"><div class="nm">加载中...</div><div class="num">--</div></div></div>
 <div id="act"><span class="sp"></span>正在查询服务器状态...</div>
-<p class="tip" id="tip" style="display:none">页面将在 <span id="cd">3</span> 秒后自动进入</p>
+<p class="tip" id="tip" style="display:none">请选择一条线路进入对话</p>
 </div>
 <script>
 const MACHINES=[
@@ -40,7 +40,7 @@ const MACHINES=[
   {id:"3",name:"3号机 · 4080S 32GB",url:"https://uu1120778-f5aecdde.weste.seetacloud.com:8443",max:2},
   {id:"4",name:"4号机 · 2080Ti 11GB",url:"https://stating-ozone-scored-mild.trycloudflare.com",max:1}
 ];
-let autoUrl=null, cd=3;
+let autoUrl=null;
 async function loadPanels(){
   try{
     const res=await fetch('./site-panels.json',{cache:'no-store'});
@@ -94,18 +94,13 @@ function renderServers(ms){
   const av=ms.filter(m=>m.available).sort((x,y)=>x.online-y.online);
   if(av.length){
     const m=av[0]; autoUrl=m.url;
-    a.innerHTML=`<a class="btn" href="${m.url}">立即进入对话 &#8594;</a><p class="msg">已为您分配到 <b>${m.name}</b>（${m.online}/${m.max} 人在线）</p>`;
-    t.style.display='block'; startCountdown();
+    a.innerHTML=`<a class="btn" href="${m.url}">立即进入对话 &#8594;</a><p class="msg">推荐线路：<b>${m.name}</b>（${m.online}/${m.max} 人在线）</p>`;
+    t.style.display='block';
   }else{
     const allOffline=ms.every(m=>m.error);
     a.innerHTML=allOffline?'<p class="msg">所有服务器暂时离线，请稍后再试</p>':'<button class="btn" disabled>服务器繁忙</button><p class="msg">当前所有线路已满，请稍后再试</p>';
     t.style.display='none';
   }
-}
-function startCountdown(){
-  const el=document.getElementById('cd');
-  let n=cd;
-  const iv=setInterval(()=>{n--; if(el)el.textContent=n; if(n<=0){clearInterval(iv); if(autoUrl)location.href=autoUrl;}},1000);
 }
 loadPanels();
 refreshServers();
