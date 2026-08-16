@@ -21,7 +21,7 @@
     "buttonAction": ""
   },
   "ping": {
-    "apiBase": "https://ids-spirituality-submission-modes.trycloudflare.com",
+    "apiBase": "https://stations-add-elect-alternatively.trycloudflare.com",
     "normalText": "戳一戳站长",
     "vipText": "打赏后提醒站长"
   }
