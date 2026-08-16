@@ -19,5 +19,10 @@
     "body": "",
     "buttonText": "",
     "buttonAction": ""
+  },
+  "ping": {
+    "apiBase": "",
+    "normalText": "戳一戳站长",
+    "vipText": "打赏后提醒站长"
   }
 }
